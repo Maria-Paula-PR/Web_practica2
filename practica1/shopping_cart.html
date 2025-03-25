@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Load our JS files -->
+    <script src="./js/ShoppingCart.js"></script>
+    <script src="./js/ProductController.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="./index.html">DASW</a>
+            <div class="ms-auto">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="./shopping_cart.html">
+                            Carrito
+                            <span id="cart-counter" class="badge bg-danger">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Content -->
+    <div class="container my-5">
+        <h2>Your Shopping Cart</h2>
+        
+        <!-- Cart Table -->
+        <div class="table-responsive mt-4">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-items">
+                    <!-- Cart items will be inserted here -->
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                        <td id="cart-total">$0</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-between mt-4">
+            <a href="./index.html" class="btn btn-secondary">Continue Shopping</a>
+            <button class="btn btn-success" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+    <script>
+        // Product data
+        const products = {
+            "1": { name: "Pastor Alemán", price: 100 },
+            "2": { name: "Golden Retriever", price: 100 },
+            "3": { name: "Chihuahua", price: 100 },
+            "4": { name: "Beagle", price: 100 },
+            "5": { name: "Labrador Retriever", price: 100 },
+            "6": { name: "Bulldog", price: 100 },
+            "7": { name: "Dachshund", price: 100 },
+            "8": { name: "Husky", price: 100 }
+        };
+
+        function displayCartItems() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            let total = 0;
+
+            // Clear current items
+            cartItems.innerHTML = '';
+
+            // Add each item in cart
+            for (let [productId, quantity] of cart.items) {
+                const product = products[productId];
+                if (product && quantity > 0) {
+                    const itemTotal = product.price * quantity;
+                    total += itemTotal;
+
+                    cartItems.innerHTML += `
+                        <tr>
+                            <td>${product.name}</td>
+                            <td>$${product.price}</td>
+                            <td>
+                                <input type="number" min="1" value="${quantity}"
+                                    class="form-control" style="width: 100px"
+                                    onchange="updateQuantity('${productId}', this.value)">
+                            </td>
+                            <td>$${itemTotal}</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" 
+                                    onclick="removeItem('${productId}')">
+                                    Remove
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // If cart is empty, show message
+            if (cart.getTotalItems() === 0) {
+                cartItems.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">Your cart is empty</td>
+                    </tr>
+                `;
+            }
+
+            // Update total
+            cartTotal.textContent = `$${total}`;
+            
+            // Update cart counter
+            const cartCounter = document.getElementById('cart-counter');
+            if (cartCounter) {
+                cartCounter.textContent = cart.getTotalItems();
+            }
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            const quantity = parseInt(newQuantity);
+            if (quantity > 0) {
+                cart.items.set(productId, quantity);
+                cart.saveCart();
+            } else {
+                removeItem(productId);
+            }
+            displayCartItems();
+        }
+
+        function removeItem(productId) {
+            cart.removeItem(productId);
+            displayCartItems();
+        }
+
+        function checkout() {
+            if (cart.getTotalItems() > 0) {
+                alert('Thank you for your purchase!');
+                cart.clearCart();
+                displayCartItems();
+            } else {
+                alert('Your cart is empty!');
+            }
+        }
+
+        // Display cart items when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            cart.loadCart(); // Make sure cart is loaded
+            displayCartItems();
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
